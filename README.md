@@ -92,15 +92,8 @@ frontend/
 
 👨‍💻 Author
 Aditya Bagade
-Full-Stack Developer | MERN | TypeScript
+Full-Stack Developer.
 
-🌐 Portfolio
-💻 GitHub
-🔗 LinkedIn
-
-✅ This README covers Practical (70 Marks) + Theory (30 Marks) = 100 Marks.
 ⭐ If you liked this project, don’t forget to star the repo!
 
 ---
-
-Would you like me to also **add screenshots (workflow board, auth page, dark mode)** inside this `README.md` (with `![Alt text](image-url)`) so it looks more professional for submission and GitHub?
