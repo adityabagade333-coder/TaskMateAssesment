@@ -115,6 +115,12 @@ const Navbar = () => {
               >
                 Dashboard
               </a>
+               <a
+                href="/profile"
+                className="block px-3 py-2 rounded-md text-base font-medium text-gray-900 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+              >
+                Profile
+              </a>
             </div>
             
             {/* Mobile Profile Section */}
@@ -135,6 +141,12 @@ const Navbar = () => {
                 </div>
               </div>
               <div className="mt-3 space-y-1 px-2">
+                <a
+                href="/profile"
+                className="block px-3 py-2 rounded-md text-base font-medium text-gray-900 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+              >
+                Profile
+              </a>
                 <button
                   onClick={handleLogout}
                   className="flex items-center w-full px-3 py-2 rounded-md text-base font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
