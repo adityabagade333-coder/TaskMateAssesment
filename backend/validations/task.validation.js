@@ -19,6 +19,13 @@ const taskSchema = Joi.object({
       'string.max': 'Description cannot exceed 500 characters'
     }),
   
+  status: Joi.string()
+    .valid('backlog', 'todo', 'in-progress', 'review', 'done')
+    .default('backlog')
+    .messages({
+      'any.only': 'Status must be one of: backlog, todo, in-progress, review, done'
+    }),
+  
   priority: Joi.string()
     .valid('low', 'medium', 'high')
     .default('medium')
@@ -39,11 +46,11 @@ const taskSchema = Joi.object({
 
 const bulkOperationSchema = Joi.object({
   action: Joi.string()
-    .valid('markCompleted', 'markPending', 'updatePriority', 'delete')
+    .valid('markCompleted', 'markPending', 'updatePriority', 'updateStatus', 'delete')
     .required()
     .messages({
       'string.empty': 'Action is required',
-      'any.only': 'Action must be one of: markCompleted, markPending, updatePriority, delete'
+      'any.only': 'Action must be one of: markCompleted, markPending, updatePriority, updateStatus, delete'
     }),
   
   taskIds: Joi.array()
@@ -56,9 +63,10 @@ const bulkOperationSchema = Joi.object({
     }),
   
   data: Joi.object({
-    priority: Joi.string().valid('low', 'medium', 'high')
+    priority: Joi.string().valid('low', 'medium', 'high'),
+    status: Joi.string().valid('backlog', 'todo', 'in-progress', 'review', 'done')
   }).when('action', {
-    is: 'updatePriority',
+    is: Joi.any().valid('updatePriority', 'updateStatus'),
     then: Joi.required(),
     otherwise: Joi.optional()
   })

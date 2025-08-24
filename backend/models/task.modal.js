@@ -12,6 +12,11 @@ const taskSchema = new mongoose.Schema({
     trim: true,
     maxlength: [500, 'Description cannot exceed 500 characters']
   },
+  status: {
+    type: String,
+    enum: ['backlog', 'todo', 'in-progress', 'review', 'done'],
+    default: 'backlog'
+  },
   completed: {
     type: Boolean,
     default: false
@@ -35,5 +40,11 @@ const taskSchema = new mongoose.Schema({
 
 // Index for better query performance
 taskSchema.index({ user: 1, createdAt: -1 });
+taskSchema.index({ user: 1, status: 1 });
+
+// Middleware to update completed field based on status
+taskSchema.pre('save', function() {
+  this.completed = this.status === 'done';
+});
 
 module.exports = mongoose.model('Task', taskSchema);

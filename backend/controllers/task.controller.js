@@ -3,12 +3,13 @@ const mongoose = require('mongoose');
 
 const createTask = async (req, res) => {
   try {
-    const { title, description, priority, dueDate } = req.body;
+    const { title, description, priority, dueDate, status } = req.body;
 
     const task = await Task.create({
       title,
       description,
       priority: priority || 'medium',
+      status: status || 'backlog',
       dueDate,
       user: req.user.userId
     });
@@ -30,12 +31,16 @@ const createTask = async (req, res) => {
 
 const getTasks = async (req, res) => {
   try {
-    const { completed, priority, sort = 'createdAt', order = 'desc', search, page = 1, limit = 10 } = req.query;
+    const { completed, priority, status, sort = 'createdAt', order = 'desc', search, page = 1, limit = 100 } = req.query;
     
     let query = { user: req.user.userId };
 
     if (completed !== undefined) {
       query.completed = completed === 'true';
+    }
+
+    if (status) {
+      query.status = status;
     }
 
     if (priority) {
@@ -109,18 +114,28 @@ const getTask = async (req, res) => {
 
 const updateTask = async (req, res) => {
   try {
-    const { title, description, priority, dueDate, completed } = req.body;
+    const { title, description, priority, dueDate, completed, status } = req.body;
+
+    const updateData = {
+      title, 
+      description, 
+      priority, 
+      dueDate,
+      updatedAt: Date.now()
+    };
+
+    // Handle status updates
+    if (status !== undefined) {
+      updateData.status = status;
+      updateData.completed = status === 'done';
+    } else if (completed !== undefined) {
+      updateData.completed = completed;
+      updateData.status = completed ? 'done' : (updateData.status || 'in-progress');
+    }
 
     const task = await Task.findOneAndUpdate(
       { _id: req.params.id, user: req.user.userId },
-      { 
-        title, 
-        description, 
-        priority, 
-        dueDate, 
-        completed,
-        updatedAt: Date.now()
-      },
+      updateData,
       { new: true, runValidators: true }
     );
 
@@ -205,6 +220,23 @@ const getTaskStats = async (req, res) => {
               ]
             }
           },
+          // Status breakdown
+          backlog: {
+            $sum: { $cond: [{ $eq: ['$status', 'backlog'] }, 1, 0] }
+          },
+          todo: {
+            $sum: { $cond: [{ $eq: ['$status', 'todo'] }, 1, 0] }
+          },
+          inProgress: {
+            $sum: { $cond: [{ $eq: ['$status', 'in-progress'] }, 1, 0] }
+          },
+          review: {
+            $sum: { $cond: [{ $eq: ['$status', 'review'] }, 1, 0] }
+          },
+          done: {
+            $sum: { $cond: [{ $eq: ['$status', 'done'] }, 1, 0] }
+          },
+          // Priority breakdown
           lowPriority: {
             $sum: { $cond: [{ $eq: ['$priority', 'low'] }, 1, 0] }
           },
@@ -223,6 +255,11 @@ const getTaskStats = async (req, res) => {
       completed: 0,
       pending: 0,
       overdue: 0,
+      backlog: 0,
+      todo: 0,
+      inProgress: 0,
+      review: 0,
+      done: 0,
       lowPriority: 0,
       mediumPriority: 0,
       highPriority: 0
@@ -237,6 +274,13 @@ const getTaskStats = async (req, res) => {
         completed: result.completed,
         pending: result.pending,
         overdue: result.overdue,
+        byStatus: {
+          backlog: result.backlog,
+          todo: result.todo,
+          'in-progress': result.inProgress,
+          review: result.review,
+          done: result.done
+        },
         byPriority: {
           low: result.lowPriority,
           medium: result.mediumPriority,
@@ -273,14 +317,14 @@ const bulkOperations = async (req, res) => {
       case 'markCompleted':
         result = await Task.updateMany(
           { _id: { $in: taskIds }, user: userId },
-          { completed: true }
+          { completed: true, status: 'done' }
         );
         break;
 
       case 'markPending':
         result = await Task.updateMany(
           { _id: { $in: taskIds }, user: userId },
-          { completed: false }
+          { completed: false, status: 'todo' }
         );
         break;
 
@@ -297,6 +341,22 @@ const bulkOperations = async (req, res) => {
         );
         break;
 
+      case 'updateStatus':
+        if (!data || !data.status) {
+          return res.status(400).json({
+            success: false,
+            message: 'Status is required for updateStatus action'
+          });
+        }
+        result = await Task.updateMany(
+          { _id: { $in: taskIds }, user: userId },
+          { 
+            status: data.status,
+            completed: data.status === 'done'
+          }
+        );
+        break;
+
       case 'delete':
         result = await Task.deleteMany(
           { _id: { $in: taskIds }, user: userId }
@@ -306,7 +366,7 @@ const bulkOperations = async (req, res) => {
       default:
         return res.status(400).json({
           success: false,
-          message: 'Invalid action. Allowed actions: markCompleted, markPending, updatePriority, delete'
+          message: 'Invalid action. Allowed actions: markCompleted, markPending, updatePriority, updateStatus, delete'
         });
     }
 
@@ -339,12 +399,20 @@ const toggleTaskStatus = async (req, res) => {
       });
     }
 
-    task.completed = !task.completed;
+    // Toggle between done and in-progress
+    if (task.status === 'done') {
+      task.status = 'in-progress';
+      task.completed = false;
+    } else {
+      task.status = 'done';
+      task.completed = true;
+    }
+
     await task.save();
 
     res.status(200).json({
       success: true,
-      message: `Task marked as ${task.completed ? 'completed' : 'pending'}`,
+      message: `Task marked as ${task.completed ? 'completed' : 'in progress'}`,
       task
     });
 
@@ -376,6 +444,7 @@ const duplicateTask = async (req, res) => {
       description: originalTask.description,
       priority: originalTask.priority,
       dueDate: originalTask.dueDate,
+      status: 'backlog',
       completed: false,
       user: req.user.userId
     });

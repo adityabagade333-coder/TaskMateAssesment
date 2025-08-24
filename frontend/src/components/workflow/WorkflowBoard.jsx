@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { tasksAPI } from '../../services/api';
 import TaskFormModal from '../tasks/TaskFormModal';
-import TaskDetailModal from '../tasks/TaskDetailModal';
 import StatusColumn from './StatusColumn';
 import Loading from '../ui/Loading';
 import { toast } from 'react-hot-toast';
@@ -19,10 +18,17 @@ const WorkflowBoard = () => {
 
   const columns = [
     { 
+      id: 'backlog', 
+      title: 'Backlog', 
+      color: 'bg-slate-50 dark:bg-slate-800/50',
+      headerColor: 'bg-slate-100 dark:bg-slate-700',
+      count: 0
+    },
+    { 
       id: 'todo', 
       title: 'To Do', 
-      color: 'bg-gray-100 dark:bg-gray-700',
-      headerColor: 'bg-gray-200 dark:bg-gray-600',
+      color: 'bg-gray-50 dark:bg-gray-800/50',
+      headerColor: 'bg-gray-100 dark:bg-gray-700',
       count: 0
     },
     { 
@@ -35,22 +41,15 @@ const WorkflowBoard = () => {
     { 
       id: 'review', 
       title: 'Review', 
-      color: 'bg-yellow-50 dark:bg-yellow-900/10',
-      headerColor: 'bg-yellow-100 dark:bg-yellow-900/30',
-      count: 0
-    },
-    { 
-      id: 'testing', 
-      title: 'Testing', 
-      color: 'bg-purple-50 dark:bg-purple-900/10',
-      headerColor: 'bg-purple-100 dark:bg-purple-900/30',
+      color: 'bg-amber-50 dark:bg-amber-900/10',
+      headerColor: 'bg-amber-100 dark:bg-amber-900/30',
       count: 0
     },
     { 
       id: 'done', 
       title: 'Done', 
-      color: 'bg-green-50 dark:bg-green-900/10',
-      headerColor: 'bg-green-100 dark:bg-green-900/30',
+      color: 'bg-emerald-50 dark:bg-emerald-900/10',
+      headerColor: 'bg-emerald-100 dark:bg-emerald-900/30',
       count: 0
     }
   ];
@@ -74,9 +73,9 @@ const WorkflowBoard = () => {
   };
 
   const getTaskStatus = (task) => {
-    if (task.completed) return 'done';
     if (task.status) return task.status;
-    return 'todo';
+    if (task.completed) return 'done';
+    return 'backlog';
   };
 
   const getTasksByColumn = (columnId) => {
@@ -95,7 +94,8 @@ const WorkflowBoard = () => {
       setTaskModalLoading(true);
       const response = await tasksAPI.createTask({
         ...taskData,
-        completed: (createInColumn || 'todo') === 'done'
+        status: createInColumn || 'backlog',
+        completed: (createInColumn || 'backlog') === 'done'
       });
       setTasks(prev => [response.task, ...prev]);
       setShowTaskModal(false);
@@ -175,6 +175,7 @@ const WorkflowBoard = () => {
         description: draggedTask.description || '',
         priority: draggedTask.priority,
         dueDate: draggedTask.dueDate,
+        status: columnId,
         completed: columnId === 'done'
       };
 
