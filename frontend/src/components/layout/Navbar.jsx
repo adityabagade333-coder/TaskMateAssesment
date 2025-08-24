@@ -1,7 +1,7 @@
 import { useState } from 'react';
-import { Menu, X, User, LogOut, Settings, Bell } from 'lucide-react';
+import { Menu, X, User, LogOut, Bell } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -33,18 +33,18 @@ const Navbar = () => {
             {/* Desktop Navigation */}
             <div className="hidden md:block ml-10">
               <div className="flex items-baseline space-x-4">
-                <a
-                  href="/dashboard"
+                <Link
+                  to="/dashboard"
                   className="px-3 py-2 rounded-md text-sm font-medium text-gray-900 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
                 >
                   Dashboard
-                </a>
-                <a
-                  href="/profile"
+                </Link>
+                <Link
+                  to="/profile"
                   className="px-3 py-2 rounded-md text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
                 >
                   Profile
-                </a>
+                </Link>
               </div>
             </div>
           </div>
@@ -75,13 +75,13 @@ const Navbar = () => {
               {/* Profile Dropdown Menu */}
               {isProfileOpen && (
                 <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-md shadow-lg py-1 z-50 border border-gray-200 dark:border-gray-700">
-                  <a
-                    href="/profile"
+                  <Link
+                    to="/profile"
                     className="flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
                   >
                     <User size={16} className="mr-3" />
                     Profile
-                  </a>
+                  </Link>
                   <button
                     onClick={handleLogout}
                     className="flex items-center w-full px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
@@ -109,18 +109,18 @@ const Navbar = () => {
         {isMenuOpen && (
           <div className="md:hidden">
             <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3 border-t border-gray-200 dark:border-gray-700">
-              <a
-                href="/dashboard"
+              <Link
+                to="/dashboard"
                 className="block px-3 py-2 rounded-md text-base font-medium text-gray-900 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
               >
                 Dashboard
-              </a>
-               <a
-                href="/profile"
+              </Link>
+              <Link
+                to="/profile"
                 className="block px-3 py-2 rounded-md text-base font-medium text-gray-900 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
               >
                 Profile
-              </a>
+              </Link>
             </div>
             
             {/* Mobile Profile Section */}
@@ -141,12 +141,12 @@ const Navbar = () => {
                 </div>
               </div>
               <div className="mt-3 space-y-1 px-2">
-                <a
-                href="/profile"
-                className="block px-3 py-2 rounded-md text-base font-medium text-gray-900 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-              >
-                Profile
-              </a>
+                <Link
+                  to="/profile"
+                  className="block px-3 py-2 rounded-md text-base font-medium text-gray-900 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                >
+                  Profile
+                </Link>
                 <button
                   onClick={handleLogout}
                   className="flex items-center w-full px-3 py-2 rounded-md text-base font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
