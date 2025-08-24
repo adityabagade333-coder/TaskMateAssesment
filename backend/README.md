@@ -57,8 +57,8 @@ task-manager-backend/
 
 ```bash
 # Clone the repository
-git clone <your-repo-url>
-cd task-manager-backend
+git clone https://github.com/adityabagade333-coder/TaskMateAssesment.git
+cd backend
 
 # Install dependencies
 npm install
