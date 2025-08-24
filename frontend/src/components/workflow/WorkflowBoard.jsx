@@ -130,8 +130,6 @@ const WorkflowBoard = () => {
   };
 
   const handleDeleteTask = async (taskId) => {
-    if (!window.confirm('Are you sure you want to delete this task?')) return;
-
     try {
       await tasksAPI.deleteTask(taskId);
       setTasks(prev => prev.filter(task => task._id !== taskId));

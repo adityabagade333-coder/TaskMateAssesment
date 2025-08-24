@@ -15,9 +15,6 @@ const StatusColumn = ({
   isDragging 
 }) => {
   const [dragOver, setDragOver] = useState(false);
-  const [touchStart, setTouchStart] = useState(null);
-  const [touchTask, setTouchTask] = useState(null);
-  const [longPressTimer, setLongPressTimer] = useState(null);
 
   const handleDragOver = (e) => {
     e.preventDefault();
@@ -36,98 +33,6 @@ const StatusColumn = ({
     onDrop(column.id);
   };
 
-  // Mobile touch handlers for drag and drop
-  const handleTouchStart = (e, task) => {
-    const touch = e.touches[0];
-    setTouchStart({
-      x: touch.clientX,
-      y: touch.clientY,
-      time: Date.now()
-    });
-    setTouchTask(task);
-
-    // Long press detection for drag initiation
-    const timer = setTimeout(() => {
-      if (touchTask && touchStart) {
-        // Vibrate if available (mobile feedback)
-        if (navigator.vibrate) {
-          navigator.vibrate(50);
-        }
-        onDragStart(task);
-      }
-    }, 500); // 500ms for long press
-
-    setLongPressTimer(timer);
-  };
-
-  const handleTouchMove = (e, task) => {
-    if (!touchStart || !touchTask) return;
-
-    const touch = e.touches[0];
-    const deltaX = Math.abs(touch.clientX - touchStart.x);
-    const deltaY = Math.abs(touch.clientY - touchStart.y);
-    const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
-
-    // If moved more than 10px, cancel long press
-    if (distance > 10 && longPressTimer) {
-      clearTimeout(longPressTimer);
-      setLongPressTimer(null);
-    }
-
-    // If dragging is active, prevent scrolling
-    if (isDragging && touchTask._id === task._id) {
-      e.preventDefault();
-      
-      // Get element under touch point
-      const elementBelow = document.elementFromPoint(touch.clientX, touch.clientY);
-      const dropZone = elementBelow?.closest('[data-column-id]');
-      
-      if (dropZone) {
-        const columnId = dropZone.getAttribute('data-column-id');
-        if (columnId && columnId !== column.id) {
-          setDragOver(columnId === column.id);
-        }
-      }
-    }
-  };
-
-  const handleTouchEnd = (e, task) => {
-    if (longPressTimer) {
-      clearTimeout(longPressTimer);
-      setLongPressTimer(null);
-    }
-
-    if (!touchStart || !touchTask) {
-      setTouchStart(null);
-      setTouchTask(null);
-      return;
-    }
-
-    const timeDiff = Date.now() - touchStart.time;
-    
-    // If dragging was active, handle drop
-    if (isDragging && touchTask._id === task._id) {
-      const touch = e.changedTouches[0];
-      const elementBelow = document.elementFromPoint(touch.clientX, touch.clientY);
-      const dropZone = elementBelow?.closest('[data-column-id]');
-      
-      if (dropZone) {
-        const columnId = dropZone.getAttribute('data-column-id');
-        if (columnId && columnId !== column.id) {
-          onDrop(columnId);
-        }
-      }
-      onDragEnd();
-    } else if (timeDiff < 200) {
-      // Quick tap - view task
-      onViewTask(task);
-    }
-
-    setTouchStart(null);
-    setTouchTask(null);
-    setDragOver(false);
-  };
-
   return (
     <div className="flex-shrink-0 w-64 sm:w-72 lg:w-80">
       {/* Column Header */}
@@ -138,7 +43,7 @@ const StatusColumn = ({
               {column.title}
             </h3>
             <span className="bg-white dark:bg-gray-700 text-gray-600 dark:text-gray-400 text-xs px-2 py-0.5 rounded-full font-medium">
-              {column.count}
+              {tasks.length}
             </span>
           </div>
           <button
@@ -178,39 +83,18 @@ const StatusColumn = ({
             </div>
           ) : (
             tasks.map(task => (
-              <div
+              <TaskCard
                 key={task._id}
-                className="relative"
-                onTouchStart={(e) => handleTouchStart(e, task)}
-                onTouchMove={(e) => handleTouchMove(e, task)}
-                onTouchEnd={(e) => handleTouchEnd(e, task)}
-              >
-                {/* Mobile Drag Handle */}
-                <div className="absolute left-1 top-1/2 -translate-y-1/2 z-10 sm:hidden opacity-60">
-                  <GripVertical 
-                    size={16} 
-                    className="text-gray-400 dark:text-gray-500 touch-manipulation" 
-                  />
-                </div>
-                
-                <TaskCard
-                  task={task}
-                  onView={onViewTask}
-                  onDelete={onDeleteTask}
-                  onStatusChange={onStatusChange}
-                  onDragStart={onDragStart}
-                  onDragEnd={onDragEnd}
-                  className={`${
-                    isDragging && touchTask?._id === task._id 
-                      ? 'opacity-50 scale-105 rotate-2 z-50' 
-                      : ''
-                  }`}
-                />
-              </div>
+                task={task}
+                onView={onViewTask}
+                onDelete={onDeleteTask}
+                onStatusChange={onStatusChange}
+                onDragStart={onDragStart}
+                onDragEnd={onDragEnd}
+              />
             ))
           )}
           
-          {/* Drop Zone (visible when dragging) */}
           {isDragging && (
             <div className={`border-2 border-dashed rounded-lg p-3 sm:p-4 text-center text-sm transition-all duration-200 ${
               dragOver 
@@ -224,11 +108,6 @@ const StatusColumn = ({
             </div>
           )}
         </div>
-      </div>
-
-      {/* Mobile Instructions */}
-      <div className="sm:hidden mt-2 text-xs text-gray-500 dark:text-gray-400 text-center px-2">
-        Long press and drag to move tasks
       </div>
     </div>
   );
