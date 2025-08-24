@@ -1,16 +1,18 @@
 import { useState, useEffect } from 'react';
 import { tasksAPI } from '../../services/api';
+import TaskFormModal from '../tasks/TaskFormModal';
+import TaskDetailModal from '../tasks/TaskDetailModal';
 import StatusColumn from './StatusColumn';
 import Loading from '../ui/Loading';
 import { toast } from 'react-hot-toast';
-
-import TaskFormModal from '../tasks/TaskForm';
 
 const WorkflowBoard = () => {
   const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showTaskModal, setShowTaskModal] = useState(false);
   const [editingTask, setEditingTask] = useState(null);
+  const [selectedTask, setSelectedTask] = useState(null);
+  const [modalMode, setModalMode] = useState('create'); // 'create', 'edit', 'view'
   const [taskModalLoading, setTaskModalLoading] = useState(false);
   const [draggedTask, setDraggedTask] = useState(null);
   const [createInColumn, setCreateInColumn] = useState(null);
@@ -98,6 +100,7 @@ const WorkflowBoard = () => {
       setTasks(prev => [response.task, ...prev]);
       setShowTaskModal(false);
       setCreateInColumn(null);
+      setModalMode('create');
       toast.success('Task created successfully!');
     } catch (error) {
       console.error('Error creating task:', error);
@@ -110,12 +113,13 @@ const WorkflowBoard = () => {
   const handleUpdateTask = async (taskData) => {
     try {
       setTaskModalLoading(true);
-      const response = await tasksAPI.updateTask(editingTask._id, taskData);
+      const response = await tasksAPI.updateTask(selectedTask._id, taskData);
       setTasks(prev => prev.map(task => 
-        task._id === editingTask._id ? response.task : task
+        task._id === selectedTask._id ? response.task : task
       ));
       setShowTaskModal(false);
-      setEditingTask(null);
+      setSelectedTask(null);
+      setModalMode('create');
       toast.success('Task updated successfully!');
     } catch (error) {
       console.error('Error updating task:', error);
@@ -138,13 +142,16 @@ const WorkflowBoard = () => {
     }
   };
 
-  const handleEditTask = (task) => {
-    setEditingTask(task);
+  const handleViewTask = (task) => {
+    setSelectedTask(task);
+    setModalMode('view');
     setShowTaskModal(true);
   };
 
   const handleAddTask = (columnId) => {
     setCreateInColumn(columnId);
+    setSelectedTask(null);
+    setModalMode('create');
     setShowTaskModal(true);
   };
 
@@ -191,8 +198,9 @@ const WorkflowBoard = () => {
 
   const handleCloseModal = () => {
     setShowTaskModal(false);
-    setEditingTask(null);
+    setSelectedTask(null);
     setCreateInColumn(null);
+    setModalMode('create');
   };
 
   if (loading) {
@@ -213,7 +221,7 @@ const WorkflowBoard = () => {
             column={column}
             tasks={getTasksByColumn(column.id)}
             onAddTask={() => handleAddTask(column.id)}
-            onEditTask={handleEditTask}
+            onViewTask={handleViewTask}
             onDeleteTask={handleDeleteTask}
             onDragStart={handleDragStart}
             onDragEnd={handleDragEnd}
@@ -227,9 +235,11 @@ const WorkflowBoard = () => {
       <TaskFormModal
         isOpen={showTaskModal}
         onClose={handleCloseModal}
-        onSubmit={editingTask ? handleUpdateTask : handleCreateTask}
-        task={editingTask}
+        onSubmit={modalMode === 'create' ? handleCreateTask : handleUpdateTask}
+        onDelete={handleDeleteTask}
+        task={selectedTask}
         loading={taskModalLoading}
+        mode={modalMode}
       />
     </div>
   );

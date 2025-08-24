@@ -6,7 +6,7 @@ const StatusColumn = ({
   column, 
   tasks, 
   onAddTask, 
-  onEditTask, 
+  onViewTask, 
   onDeleteTask, 
   onDragStart, 
   onDragEnd, 
@@ -84,7 +84,7 @@ const StatusColumn = ({
               <TaskCard
                 key={task._id}
                 task={task}
-                onEdit={onEditTask}
+                onView={onViewTask}
                 onDelete={onDeleteTask}
                 onDragStart={onDragStart}
                 onDragEnd={onDragEnd}
