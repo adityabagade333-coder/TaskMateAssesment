@@ -135,10 +135,48 @@ const WorkflowBoard = () => {
     try {
       await tasksAPI.deleteTask(taskId);
       setTasks(prev => prev.filter(task => task._id !== taskId));
+      setShowTaskModal(false);
       toast.success('Task deleted successfully!');
     } catch (error) {
       console.error('Error deleting task:', error);
       toast.error('Failed to delete task');
+    }
+  };
+
+  const handleStatusChange = async (taskId, newStatus) => {
+    const task = tasks.find(t => t._id === taskId);
+    if (!task) return;
+
+    try {
+      const updatedData = {
+        title: task.title,
+        description: task.description || '',
+        priority: task.priority,
+        dueDate: task.dueDate,
+        status: newStatus,
+        completed: newStatus === 'done'
+      };
+
+      const response = await tasksAPI.updateTask(taskId, updatedData);
+      
+      setTasks(prev => prev.map(t => 
+        t._id === taskId ? response.task : t
+      ));
+      
+      const statusLabels = {
+        'backlog': 'Backlog',
+        'todo': 'To Do',
+        'in-progress': 'In Progress',
+        'review': 'Review',
+        'done': 'Done'
+      };
+      
+      toast.success(`Task moved to ${statusLabels[newStatus]}`, {
+        icon: newStatus === 'done' ? '✅' : '🔄'
+      });
+    } catch (error) {
+      console.error('Error updating task status:', error);
+      toast.error('Failed to update task status');
     }
   };
 
@@ -224,6 +262,7 @@ const WorkflowBoard = () => {
             onAddTask={() => handleAddTask(column.id)}
             onViewTask={handleViewTask}
             onDeleteTask={handleDeleteTask}
+            onStatusChange={handleStatusChange}
             onDragStart={handleDragStart}
             onDragEnd={handleDragEnd}
             onDrop={handleDrop}

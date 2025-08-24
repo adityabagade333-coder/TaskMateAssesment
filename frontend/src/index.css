@@ -77,3 +77,232 @@ body {
 .slide-up {
   animation: slideUp 0.3s ease-out;
 }
+
+/* Enhanced Responsive Styles for TaskManager App */
+/* Add this to your main CSS file or create a new one */
+
+/* Custom breakpoints for better mobile experience */
+@media (max-width: 374px) {
+  /* Extra small phones */
+  .task-card {
+    padding: 0.75rem !important;
+  }
+  
+  .task-title {
+    font-size: 0.75rem !important;
+  }
+  
+  .workflow-board {
+    gap: 0.5rem !important;
+  }
+}
+
+@media (min-width: 375px) and (max-width: 640px) {
+  /* Standard mobile */
+  .workflow-scroll {
+    padding-bottom: 1rem;
+  }
+  
+  .status-column {
+    min-width: 280px;
+    width: 280px;
+  }
+  
+  .task-card {
+    margin-bottom: 0.75rem;
+  }
+}
+
+@media (min-width: 641px) and (max-width: 768px) {
+  /* Tablet portrait */
+  .status-column {
+    min-width: 300px;
+    width: 300px;
+  }
+}
+
+@media (min-width: 769px) and (max-width: 1024px) {
+  /* Tablet landscape */
+  .workflow-board {
+    padding: 0 1rem;
+  }
+  
+  .status-column {
+    min-width: 320px;
+    width: 320px;
+  }
+}
+
+/* Utility classes for responsive design */
+.line-clamp-1 {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 1;
+}
+
+.line-clamp-2 {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.line-clamp-3 {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+}
+
+/* Custom scrollbar for workflow board */
+.workflow-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(156, 163, 175, 0.5) transparent;
+}
+
+.workflow-scroll::-webkit-scrollbar {
+  height: 8px;
+}
+
+.workflow-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.workflow-scroll::-webkit-scrollbar-thumb {
+  background-color: rgba(156, 163, 175, 0.5);
+  border-radius: 4px;
+}
+
+.workflow-scroll::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(156, 163, 175, 0.7);
+}
+
+/* Touch optimizations */
+@media (hover: none) and (pointer: coarse) {
+  .task-card {
+    transform: none !important;
+  }
+  
+  .task-card:active {
+    transform: scale(0.98) !important;
+  }
+  
+  .task-actions {
+    opacity: 1 !important;
+    transform: translateY(0) !important;
+  }
+  
+  button {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  
+  .task-status-toggle {
+    min-height: 32px;
+    min-width: 32px;
+  }
+}
+
+/* Enhanced animations for mobile */
+@media (prefers-reduced-motion: no-preference) {
+  .task-card {
+    transition: all 0.2s ease-out;
+  }
+  
+  .task-status-toggle {
+    transition: all 0.15s ease-out;
+  }
+  
+  .task-actions {
+    transition: all 0.2s ease-out;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .task-card {
+    border-width: 2px !important;
+  }
+  
+  .priority-badge {
+    border-width: 2px !important;
+  }
+  
+  .status-indicator {
+    border: 2px solid currentColor !important;
+  }
+}
+
+/* Dark mode optimizations */
+@media (prefers-color-scheme: dark) {
+  .workflow-scroll::-webkit-scrollbar-thumb {
+    background-color: rgba(75, 85, 99, 0.5);
+  }
+  
+  .workflow-scroll::-webkit-scrollbar-thumb:hover {
+    background-color: rgba(75, 85, 99, 0.7);
+  }
+}
+
+/* Print styles */
+@media print {
+  .workflow-board {
+    display: block !important;
+  }
+  
+  .status-column {
+    width: 100% !important;
+    break-inside: avoid;
+    margin-bottom: 1rem;
+  }
+  
+  .task-card {
+    break-inside: avoid;
+    box-shadow: none !important;
+    border: 1px solid #ccc !important;
+  }
+  
+  .task-actions {
+    display: none !important;
+  }
+}
+
+/* Focus styles for accessibility */
+.task-card:focus-within {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
+
+.task-status-toggle:focus {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
+
+/* Custom breakpoint utilities */
+@media (min-width: 480px) {
+  .xs\:block {
+    display: block;
+  }
+  
+  .xs\:inline {
+    display: inline;
+  }
+  
+  .xs\:hidden {
+    display: none;
+  }
+  
+  .xs\:text-sm {
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+  }
+  
+  .xs\:p-2 {
+    padding: 0.5rem;
+  }
+  
+  .xs\:gap-2 {
+    gap: 0.5rem;
+  }
+}
